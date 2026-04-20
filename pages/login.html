@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Esportes Brasil – Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f1b3d;--orange:#f5821f;--orange2:#e0711a}
+body{font-family:'Montserrat',sans-serif;background:#e8eaf0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.phone{width:375px;min-height:780px;background:#fff;border-radius:40px;box-shadow:0 24px 64px rgba(0,0,0,.22);display:flex;flex-direction:column;align-items:center;padding:52px 36px 40px;animation:up .4s ease both}
+@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.logo{background:var(--navy);border-radius:20px;width:110px;height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 8px 24px rgba(15,27,61,.3);gap:4px}
+.logo svg{width:58px;height:58px}
+.logo-text{color:#fff;font-size:10px;font-weight:800;letter-spacing:.05em;text-align:center;line-height:1.2}
+.tagline{font-size:15px;font-weight:700;color:#111;margin-bottom:18px}
+.g-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:28px;transition:box-shadow .2s}
+.g-btn:hover{box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.g-btn svg{width:24px;height:24px}
+.form{width:100%}
+.field{width:100%;margin-bottom:18px}
+.field label{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#333;margin-bottom:8px}
+.field input{width:100%;height:56px;border:1.5px solid #bbb;border-radius:6px;padding:0 18px;font-family:'Montserrat',sans-serif;font-size:14px;color:#222;outline:none;transition:border-color .2s;background:#fff}
+.field input:focus{border-color:var(--navy)}
+.btn-entrar{width:100%;height:54px;background:var(--orange);border:none;border-radius:30px;color:#fff;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;margin-bottom:16px;transition:background .2s,transform .1s;letter-spacing:.03em}
+.btn-entrar:hover{background:var(--orange2)}
+.btn-entrar:active{transform:scale(.98)}
+.links{text-align:center;font-size:12.5px;color:#555;line-height:1.8}
+.links a{color:var(--navy);font-weight:700;text-decoration:none}
+.links a.laranja{color:var(--orange)}
+@media(max-width:430px){.phone{width:100%;min-height:100dvh;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="logo">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect x="6" y="12" width="52" height="44" rx="6" fill="white" fill-opacity=".15" stroke="white" stroke-width="2.5"/>
+      <rect x="6" y="12" width="52" height="14" rx="6" fill="white" fill-opacity=".3"/>
+      <rect x="19" y="6" width="4" height="12" rx="2" fill="white"/>
+      <rect x="41" y="6" width="4" height="12" rx="2" fill="white"/>
+      <circle cx="32" cy="38" r="10" fill="white" fill-opacity=".9"/>
+      <polygon points="32,30 36,33 34.5,38 29.5,38 28,33" fill="#0f1b3d"/>
+    </svg>
+    <div class="logo-text">ESPORTES<br>BRASIL</div>
+  </div>
+  <p class="tagline">Efetue seu login</p>
+  <button class="g-btn">
+    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+  </button>
+  <div class="form">
+    <div class="field"><label>E-mail ou Usuário</label><input type="text" id="email"/></div>
+    <div class="field"><label>Senha</label><input type="password" id="senha"/></div>
+    <button class="btn-entrar" onclick="login()">Entrar</button>
+    <div class="links">
+      Esqueceu sua senha?<br><a href="esqueceu-senha.html">Clique aqui</a><br><br>
+      Não tem conta? <a href="cadastro.html" class="laranja">Cadastre-se</a>
+    </div>
+  </div>
+</div>
+<script>
+function login(){
+  const e=document.getElementById('email').value.trim();
+  const s=document.getElementById('senha').value.trim();
+  if(!e||!s){alert('Preencha e-mail e senha.');return;}
+  window.location.href='home.html';
+}
+document.addEventListener('keydown',ev=>{if(ev.key==='Enter')login()});
+</script>
+</body>
+</html>
