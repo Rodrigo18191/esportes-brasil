@@ -18,14 +18,15 @@
       <button class="tab" onclick="setTab(this,'fixos')">Fixos</button>
       <button class="tab" onclick="setTab(this,'diarias')">Diárias</button>
     </div>
-    <select class="sel" id="situacao">
-      <option value="">SELECIONE A SITUAÇÃO</option>
-      <option>Solicitados</option>
-      <option>Agendados</option>
-      <option>Cancelados</option>
-      <option>Realizados</option>
+    <select class="sel" id="situacao" onchange="carregar()">
+      <option value="">TODAS AS SITUAÇÕES</option>
+      <option value="SOLICITADO">Solicitados</option>
+      <option value="AGENDADO">Agendados</option>
+      <option value="CANCELADO">Cancelados</option>
+      <option value="REALIZADO">Realizados</option>
     </select>
-    <div class="empty">
+    <div id="lista"></div>
+    <div class="empty" id="vazio" style="display:none">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="16" cy="16" r="4"/><polyline points="15 15 16 16 18 14"/></svg>
       <p>Nenhum horário encontrado</p>
     </div>
@@ -37,8 +38,33 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
 <script>
-function setTab(el,t){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
+// As reservas da API são avulsas; as abas Fixos e Diárias seguem sem dados.
+let aba='avulsos';
+function setTab(el,t){document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));el.classList.add('active');aba=t;carregar()}
+if(exigirLogin())carregar();
+async function carregar(){
+  const lista=document.getElementById('lista'),vazio=document.getElementById('vazio');
+  vazio.style.display='none';
+  if(aba!=='avulsos'){lista.innerHTML='';vazio.style.display='flex';return;}
+  lista.innerHTML='<p class="carregando">Carregando...</p>';
+  try{
+    const rs=await API.minhasReservas(document.getElementById('situacao').value);  // GET /api/reservas/minhas (RF-007)
+    if(!rs.length){lista.innerHTML='';vazio.style.display='flex';return;}
+    lista.innerHTML=rs.map(r=>`<div class="res-item">
+      <h4>${esc(r.arena_nome)}</h4>
+      <p>${esc(rotuloEsporte(r.quadra_tipo_esporte))} · ${esc(rotuloDia(r.dia_semana))} às ${esc(r.horario)}</p>
+      <span class="res-status ${r.status}">${STATUS[r.status]||r.status}</span>
+      ${r.status==='AGENDADO'||r.status==='SOLICITADO'?`<button class="res-acao" onclick="cancelar('${r.id}')">Cancelar reserva</button>`:''}
+    </div>`).join('');
+  }catch(e){lista.innerHTML=`<p class="carregando">${esc(e.message)}</p>`}
+}
+async function cancelar(id){
+  if(!confirm('Cancelar esta reserva?'))return;
+  try{await API.cancelarReserva(id);carregar()}   // PATCH /api/reservas/:id/cancelar
+  catch(e){mostrarErro(e)}
+}
 </script>
 </body>
 </html>

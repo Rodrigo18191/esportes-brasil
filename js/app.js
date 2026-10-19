@@ -1,41 +1,5 @@
-// Dados simulados
-const DB = {
-  arenas:[
-    {id:1,nome:'SIX SPORTS',sigla:'SIX',cor:'#e63946',rating:5.0,avals:27},
-    {id:2,nome:'FUTBAR',sigla:'FB',cor:'#2b9348',rating:4.0,avals:32},
-    {id:3,nome:'SHARK',sigla:'SK',cor:'#023e8a',rating:3.0,avals:14},
-    {id:4,nome:'TROPIKALLA',sigla:'TK',cor:'#e76f51',rating:2.0,avals:31},
-  ],
-  esportes:['VÔLEI DE PRAIA','FUTEVÔLEI','BEACH TÊNIS','FUTSAL','VÔLEI DE QUADRA'],
-  turmas:{
-    'VÔLEI DE PRAIA':[
-      {lider:'LUCAS SILVA',rating:4.6,atletas:3,max:4},
-      {lider:'MARIA CLARA',rating:5.0,atletas:2,max:4},
-      {lider:'ANA LORRANE',rating:2.6,atletas:5,max:6},
-      {lider:'GABRIEL SARA',rating:2.2,atletas:7,max:8},
-      {lider:'IGOR MARTINS',rating:3.4,atletas:2,max:4},
-    ],
-    'FUTEVÔLEI':[
-      {lider:'LUCAS ALVES',rating:4.6,atletas:4,max:4},
-      {lider:'ANA CLARA',rating:5.0,atletas:3,max:4},
-      {lider:'ALLANA LUISA',rating:2.6,atletas:3,max:4},
-      {lider:'GABRIEL LIMA',rating:2.2,atletas:2,max:4},
-      {lider:'IGOR RAFAEL',rating:3.4,atletas:2,max:4},
-    ],
-    'BEACH TÊNIS':[
-      {lider:'RAFAEL COSTA',rating:4.8,atletas:1,max:2},
-      {lider:'JULIA MENDES',rating:3.9,atletas:1,max:2},
-    ],
-    'FUTSAL':[
-      {lider:'PEDRO SANTOS',rating:4.2,atletas:4,max:5},
-      {lider:'MARCOS LIMA',rating:3.7,atletas:3,max:5},
-    ],
-    'VÔLEI DE QUADRA':[
-      {lider:'CARLA SILVA',rating:4.5,atletas:5,max:6},
-      {lider:'TIAGO MELO',rating:3.1,atletas:4,max:6},
-    ],
-  },
-};
+// Componentes visuais compartilhados pelas telas.
+// Os dados exibidos vêm da API (ver js/api.js).
 
 // Ícones SVG reutilizáveis
 const ICO = {

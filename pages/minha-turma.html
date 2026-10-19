@@ -24,16 +24,10 @@
     <a href="configuracoes.html" class="ibtn"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a>
   </div>
   <div class="content" style="display:flex;flex-direction:column">
-    <p class="aviso">SOMENTE O LÍDER E O VICE-LÍDER<br>CONSEGUEM FAZER ALTERAÇÕES</p>
-    <p class="fl">Nome da turma:</p>
-    <input class="fi" type="text" placeholder=""/>
-    <p class="fl" style="margin-top:10px">Nomes dos Atletas:</p>
-    <div class="ath-row">
-      <input type="text" placeholder="Nome do atleta"/>
-      <button class="arr-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
-    </div>
+    <p class="aviso">TURMAS QUE VOCÊ CRIOU<br>OU DAS QUAIS PARTICIPA</p>
+    <div id="lista"><p class="carregando">Carregando...</p></div>
     <button class="sair-btn" onclick="location.href='home.html'">
-      Sair da turma
+      Voltar ao início
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
     </button>
   </div>
@@ -44,5 +38,24 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
+<script>
+if(exigirLogin())carregar();
+async function carregar(){
+  const lista=document.getElementById('lista');
+  try{
+    const minhas=await API.minhasTurmas();                           // GET /api/turmas/minhas
+    if(!minhas.length){lista.innerHTML='<p class="carregando">Você ainda não está em nenhuma turma.</p>';return;}
+    const turmas=await Promise.all(minhas.map(t=>API.turma(t.id)));  // GET /api/turmas/:id (participantes)
+    const eu=(SESSAO.usuario()||{}).id;
+    lista.innerHTML=turmas.map(t=>`<div class="res-item">
+      <h4>${esc(t.nome)}</h4>
+      <p>${esc(rotuloEsporte(t.esporte))} · ${esc(t.horario)}</p>
+      <p>Vagas: ${t.vagas_preenchidas}/${t.vagas_total}${t.criador_id===eu?' · você é o líder':''}</p>
+      <p style="margin-top:6px"><b>Atletas:</b> ${t.participantes.map(p=>esc(p.nome)).join(', ')}</p>
+    </div>`).join('');
+  }catch(e){lista.innerHTML=`<p class="carregando">${esc(e.message)}</p>`}
+}
+</script>
 </body>
 </html>

@@ -29,6 +29,11 @@ npm run db:reset  # cria as tabelas (migrate) e popula com dados de teste (seed)
 npm run dev       # sobe o servidor com nodemon em http://localhost:3000
 ```
 
+O mesmo servidor entrega o **frontend**: abra `http://localhost:3000` no
+navegador e as telas passam a consumir esta API (mesma origem, sem CORS). Só as
+pastas `css/`, `js/` e `pages/` e o `index.html` são servidos — o código do
+backend, o `.env` e o arquivo do banco nunca ficam acessíveis pela web.
+
 Para produção use `npm start`. O arquivo `.env` é opcional — copie de `.env.example` se quiser trocar porta, segredo do JWT ou caminho do banco:
 
 ```bash
@@ -141,7 +146,7 @@ backend/
 | **RNE-002** | Apenas horários disponíveis podem ser reservados | `src/rules/reserva.rules.js` | `validarDisponibilidade` (apoio: `reserva.repository.existeConflito`) | `409` |
 | **RNE-003** | Uma turma deve ter no mínimo dois participantes para ser criada | `src/rules/turma.rules.js` | `validarMinimoParticipantes` | `400` |
 | **RNE-004** | Um usuário só pode entrar em uma turma se houver vagas disponíveis | `src/rules/turma.rules.js` | `validarVagasDisponiveis` | `409` |
-| **RNE-005** | A avaliação de uma quadra só pode ser realizada por usuários autenticados | `src/middlewares/auth.middleware.js` (`autenticarAvaliacao`) + `src/rules/avaliacao.rules.js` | `validarAvaliacao` | `401` / `400` / `404` |
+| **RNE-005** | A avaliação de uma arena só pode ser realizada por usuários autenticados | `src/middlewares/auth.middleware.js` (`autenticarAvaliacao`) + `src/rules/avaliacao.rules.js` | `validarAvaliacao` | `401` / `400` / `404` |
 | **RNE-006** | Uma turma só fica visível após ser criada com pelo menos um esporte e um horário definido | `src/rules/turma.rules.js` (criação) + `src/repositories/turma.repository.js` (`listarVisiveis`, na listagem) | `validarVisibilidade` | `400` |
 
 ---
@@ -154,7 +159,7 @@ backend/
 | **RF-002** | Autenticação (login) | `POST /api/auth/login` |
 | **RF-003** | Consulta de arenas e quadras / avaliação | `GET /api/arenas`, `GET /api/arenas/:id`, `GET /api/arenas/:id/quadras`, `POST /api/avaliacoes` |
 | **RF-004** | Realizar agendamento | `POST /api/reservas` |
-| **RF-005** | Criar turma esportiva | `POST /api/turmas`, `GET /api/turmas/minhas` |
+| **RF-005** | Criar turma esportiva | `POST /api/turmas`, `GET /api/turmas/minhas`, `GET /api/turmas/:id` |
 | **RF-006** | Encontrar e participar de turma | `GET /api/turmas`, `POST /api/turmas/:id/participar` |
 | **RF-007** | Histórico e gestão da agenda | `GET /api/reservas/minhas`, `PATCH /api/reservas/:id/cancelar` |
 
@@ -179,8 +184,10 @@ Prefixo de todas as rotas: `/api`. Rotas autenticadas exigem o header
 | POST | `/api/turmas` | **sim** | RF-005 |
 | GET | `/api/turmas` | não | RF-006 |
 | GET | `/api/turmas/minhas` | **sim** | RF-005 |
+| GET | `/api/turmas/:id` | **sim** | RF-005 |
 | POST | `/api/turmas/:id/participar` | **sim** | RF-006 |
-| POST | `/api/avaliacoes` | **sim** | — |
+| POST | `/api/avaliacoes` | **sim** | RF-003 |
+| GET | `/api/notificacoes` | **sim** | — |
 
 ### Padrão de erro
 
@@ -535,6 +542,20 @@ curl http://localhost:3000/api/turmas/minhas -H "Authorization: Bearer $TOKEN"
 
 ---
 
+### `GET /api/turmas/:id` — RF-005
+
+Detalhe de uma turma com a lista de participantes. Usado pela tela
+**Minha Turma**.
+
+```bash
+curl http://localhost:3000/api/turmas/<id> -H "Authorization: Bearer $TOKEN"
+```
+
+`200 OK`: a turma no formato de `GET /api/turmas` mais
+`"participantes": [{ "id", "nome", "email" }]`. Turma inexistente → `404`.
+
+---
+
 ### `POST /api/turmas/:id/participar` — RF-006 · RNE-004
 
 ```bash
@@ -605,6 +626,21 @@ curl -X POST http://localhost:3000/api/avaliacoes \
 
 Sem token → `401` (RNE-005). Nota fora da lista → `400` (RNE-005).
 Arena inexistente → `404` (RNE-005).
+
+---
+
+### `GET /api/notificacoes`
+
+Notificações do usuário autenticado (reserva criada ou cancelada, turma criada,
+entrada em turma, avaliação registrada). Alimenta a tela **Notificações**.
+
+```bash
+curl http://localhost:3000/api/notificacoes -H "Authorization: Bearer $TOKEN"
+```
+
+`200 OK`: `[{ "usuario_id", "mensagem", "criado_em" }]`, da mais antiga para a
+mais recente. As notificações ficam em memória no servidor: são apagadas quando
+o servidor reinicia.
 
 ---
 

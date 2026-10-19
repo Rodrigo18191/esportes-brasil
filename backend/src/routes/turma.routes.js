@@ -12,6 +12,7 @@ const router = Router();
 
 router.get('/', turmaController.listar);
 router.get('/minhas', autenticar, turmaController.listarMinhas);
+router.get('/:id', autenticar, turmaController.detalhar);
 router.post('/', autenticar, turmaController.criar);
 router.post('/:id/participar', autenticar, turmaController.participar);
 

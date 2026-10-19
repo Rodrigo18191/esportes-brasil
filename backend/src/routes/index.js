@@ -9,6 +9,7 @@ const arenaRoutes = require('./arena.routes');
 const reservaRoutes = require('./reserva.routes');
 const turmaRoutes = require('./turma.routes');
 const avaliacaoRoutes = require('./avaliacao.routes');
+const notificacaoRoutes = require('./notificacao.routes');
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/arenas', arenaRoutes);
 router.use('/reservas', reservaRoutes);
 router.use('/turmas', turmaRoutes);
 router.use('/avaliacoes', avaliacaoRoutes);
+router.use('/notificacoes', notificacaoRoutes);
 
 module.exports = router;

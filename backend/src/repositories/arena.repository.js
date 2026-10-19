@@ -23,19 +23,24 @@ function buscarPorId(id) {
  * (comparacao sem diferenciar maiusculas/minusculas).
  */
 function listar({ regiao, cidade } = {}) {
-  let sql = `SELECT * FROM arena WHERE 1 = 1`;
+  // `total_avaliacoes` alimenta o "(N avaliacoes)" exibido nos cards de arena.
+  let sql = `
+    SELECT a.*,
+           (SELECT COUNT(*) FROM avaliacao av WHERE av.arena_id = a.id) AS total_avaliacoes
+      FROM arena a
+     WHERE 1 = 1`;
   const params = {};
 
   if (regiao) {
-    sql += ` AND UPPER(regiao) = UPPER(@regiao)`;
+    sql += ` AND UPPER(a.regiao) = UPPER(@regiao)`;
     params.regiao = regiao;
   }
   if (cidade) {
-    sql += ` AND UPPER(cidade) = UPPER(@cidade)`;
+    sql += ` AND UPPER(a.cidade) = UPPER(@cidade)`;
     params.cidade = cidade;
   }
 
-  sql += ` ORDER BY nome`;
+  sql += ` ORDER BY a.nome`;
   return db.prepare(sql).all(params);
 }
 

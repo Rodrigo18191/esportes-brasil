@@ -4,6 +4,7 @@
  * Orquestra a criacao de turmas (incluindo o criador como primeiro
  * participante) e a entrada de novos participantes.
  */
+const AppError = require('../utils/AppError');
 const { uuid, agoraISO } = require('../utils/uuid');
 const turmaRepository = require('../repositories/turma.repository');
 const notificacaoService = require('./notificacao.service');
@@ -72,4 +73,17 @@ function participar(turma, usuarioId) {
   };
 }
 
-module.exports = { criar, listarVisiveis, listarDoUsuario, participar };
+/**
+ * Detalha uma turma com a lista de participantes (tela Minha Turma).
+ * Requisitos relacionados: RF-005, RF-006
+ */
+function detalhar(turmaId) {
+  const turma = turmaRepository.buscarPorId(turmaId);
+  if (!turma) {
+    throw new AppError('Turma nao encontrada.', 404);
+  }
+
+  return { ...turma, participantes: turmaRepository.listarParticipantes(turmaId) };
+}
+
+module.exports = { criar, listarVisiveis, listarDoUsuario, detalhar, participar };

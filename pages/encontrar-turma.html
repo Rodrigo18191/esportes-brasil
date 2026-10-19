@@ -36,26 +36,38 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
-<script src="../js/app.js"></script>
+<script src="../js/api.js"></script>
 <script>
-let emTela2=false;
-DB.esportes.forEach(e=>{
-  document.getElementById('esportes').innerHTML+=`<button class="btn btn-n" onclick="verTurmas('${e}')">${e}</button>`;
-});
-function verTurmas(esp){
-  emTela2=true;
+let emTela2=false, esporteAtual=null;
+if(exigirLogin()){
+  document.getElementById('esportes').innerHTML=ESPORTES.map(e=>`<button class="btn btn-n" onclick="verTurmas('${e.valor}')">${e.rotulo}</button>`).join('');
+}
+async function verTurmas(esp){
+  emTela2=true;esporteAtual=esp;
   document.getElementById('t1').style.display='none';
   document.getElementById('t2').style.display='block';
-  document.getElementById('esub').textContent=esp;
-  const turmas=DB.turmas[esp]||[];
-  document.getElementById('turmas').innerHTML=turmas.map(t=>`
-    <div class="turma-item" onclick="alert('Solicitação enviada para a turma de ${t.lider}!')">
-      <span class="turma-lider">${t.lider} (${t.rating})</span>
+  document.getElementById('esub').textContent=rotuloEsporte(esp);
+  const el=document.getElementById('turmas');
+  el.innerHTML='<p class="carregando">Carregando turmas...</p>';
+  try{
+    const turmas=await API.turmas(esp);   // GET /api/turmas?esporte= (RF-006, RNE-006)
+    if(!turmas.length){el.innerHTML='<p class="carregando">Nenhuma turma aberta para este esporte.</p>';return;}
+    el.innerHTML=turmas.map(t=>`
+    <div class="turma-item" onclick="participar('${t.id}','${esc(t.nome)}')">
+      <span class="turma-lider">${esc(t.nome)}<br><small style="font-weight:600;opacity:.8">${esc(t.criador_nome)} · ${esc(t.horario)}</small></span>
       <div class="turma-meta">
-        <span class="turma-star">★</span>
-        <span class="turma-vagas"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>${t.atletas}/${t.max}</span>
+        <span class="turma-vagas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${t.vagas_preenchidas}/${t.vagas_total}</span>
       </div>
     </div>`).join('');
+  }catch(e){el.innerHTML=`<p class="carregando">${esc(e.message)}</p>`}
+}
+async function participar(id,nome){
+  if(!confirm(`Entrar na turma "${nome}"?`))return;
+  try{
+    await API.participar(id);   // POST /api/turmas/:id/participar (RNE-004)
+    alert('Você entrou na turma!');
+    verTurmas(esporteAtual);
+  }catch(e){mostrarErro(e)}
 }
 function voltar(){
   if(emTela2){emTela2=false;document.getElementById('t2').style.display='none';document.getElementById('t1').style.display='block'}

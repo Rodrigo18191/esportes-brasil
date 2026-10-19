@@ -32,14 +32,15 @@
       <a href="minha-turma.html" class="btn-minha">Acessar<br>Minha Turma ›</a>
     </div>
     <div class="sel-row">
-      <select class="sel"><option>QUANTIDADE DE ATLETAS</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option></select>
-      <select class="sel"><option>SELECIONAR ESPORTE</option><option>Vôlei de Praia</option><option>Futevôlei</option><option>Beach Tênis</option><option>Futsal</option><option>Vôlei de Quadra</option></select>
+      <select class="sel" id="vagas"><option value="">QUANTIDADE DE ATLETAS</option><option>2</option><option>4</option><option>6</option><option>8</option><option>10</option></select>
+      <select class="sel" id="esporte"><option value="">SELECIONAR ESPORTE</option></select>
     </div>
-    <p class="ath-lbl">Nomes dos Atletas:</p>
-    <div id="lista">
-      <div class="ath-row"><input type="text" placeholder="Nome do atleta"/><button class="cbtn add" onclick="add()">+</button></div>
-      <div class="ath-row"><input type="text" placeholder="Nome do atleta"/><button class="cbtn rem" onclick="rem(this)">−</button></div>
+    <div class="sel-row">
+      <select class="sel" id="dia"><option value="">DIA DA PARTIDA</option></select>
+      <select class="sel" id="hora"><option value="">HORÁRIO</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select>
     </div>
+    <p class="ath-lbl">Atletas:</p>
+    <p style="font-size:12px;color:#555;line-height:1.5">Você entra como líder da turma. Os demais atletas encontram a turma na tela <b>Procurar uma Turma</b> e entram enquanto houver vagas.</p>
     <button class="btn btn-o" style="margin-top:20px;border-radius:16px" onclick="criar()">CRIAR!</button>
   </div>
   <nav class="bnav">
@@ -49,10 +50,26 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
 <script>
-function add(){const l=document.getElementById('lista');const d=document.createElement('div');d.className='ath-row';d.innerHTML=`<input type="text" placeholder="Nome do atleta"/><button class="cbtn rem" onclick="rem(this)">−</button>`;l.appendChild(d)}
-function rem(b){const r=b.closest('.ath-row');if(document.querySelectorAll('.ath-row').length>1)r.remove()}
-function criar(){const n=document.getElementById('nome').value.trim();if(!n){alert('Informe o nome da turma.');return;}alert(`Turma "${n}" criada!`);location.href='minha-turma.html'}
+exigirLogin();
+document.getElementById('esporte').innerHTML+=ESPORTES.map(e=>`<option value="${e.valor}">${e.rotulo}</option>`).join('');
+document.getElementById('dia').innerHTML+=DIAS.map(d=>`<option value="${d.rotulo}">${d.rotulo}</option>`).join('');
+async function criar(){
+  const nome=document.getElementById('nome').value.trim();
+  const vagas_total=Number(document.getElementById('vagas').value);
+  const esporte=document.getElementById('esporte').value;
+  const dia=document.getElementById('dia').value, hora=document.getElementById('hora').value;
+  if(!nome){alert('Informe o nome da turma.');return;}
+  if(!vagas_total){alert('Selecione a quantidade de atletas.');return;}
+  // Esporte e horário vazios seguem para a API, que aplica a RNE-006 e devolve o erro.
+  const horario=dia&&hora?`${dia} ${hora}`:'';
+  try{
+    await API.criarTurma({nome,esporte,horario,vagas_total});   // POST /api/turmas (RF-005, RNE-003, RNE-006)
+    alert(`Turma "${nome}" criada!`);
+    location.href='minha-turma.html';
+  }catch(e){mostrarErro(e)}
+}
 </script>
 </body>
 </html>

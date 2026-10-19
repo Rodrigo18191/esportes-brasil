@@ -61,6 +61,7 @@ body{font-family:'Montserrat',sans-serif;background:#e8eaf0;min-height:100vh;dis
     <div class="links">Já tem uma conta? <a href="login.html">Faça login</a></div>
   </div>
 </div>
+<script src="../js/api.js"></script>
 <script>
 function mascara(el){
   let v=el.value.replace(/\D/g,'');
@@ -70,7 +71,7 @@ function mascara(el){
   else if(v.length>0)v=`(${v}`;
   el.value=v;
 }
-function cadastrar(){
+async function cadastrar(){
   const nome=document.getElementById('nome').value.trim();
   const email=document.getElementById('email').value.trim();
   const cel=document.getElementById('celular').value.trim();
@@ -79,8 +80,16 @@ function cadastrar(){
   if(!nome||!email||!cel||!senha||!confirma){alert('Preencha todos os campos.');return;}
   if(senha!==confirma){alert('As senhas não coincidem.');return;}
   if(senha.length<6){alert('A senha deve ter ao menos 6 caracteres.');return;}
-  alert(`Cadastro realizado com sucesso!\nBem-vindo, ${nome}!`);
-  window.location.href='home.html';
+  const btn=document.querySelector('.btn-cadastrar');
+  btn.disabled=true;
+  try{
+    await API.cadastrar({nome,email,celular:cel,senha});   // POST /api/auth/cadastro (RF-001)
+    const r=await API.login(email,senha);                  // já entra na conta
+    SESSAO.salvar(r.token,r.usuario);
+    alert(`Cadastro realizado com sucesso!\nBem-vindo, ${r.usuario.nome}!`);
+    location.href='home.html';
+  }catch(err){mostrarErro(err)}
+  finally{btn.disabled=false}
 }
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter')cadastrar()});
 </script>

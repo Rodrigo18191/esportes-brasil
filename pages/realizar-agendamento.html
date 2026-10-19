@@ -19,8 +19,10 @@
   <div class="content">
     <div>
       <p class="ftitle">REALIZAR AGENDAMENTO</p>
-      <select class="sel" id="dia"><option value="">DIAS DE SEMANA</option><option>Segunda-feira</option><option>Terça-feira</option><option>Quarta-feira</option><option>Quinta-feira</option><option>Sexta-feira</option><option>Sábado</option><option>Domingo</option></select>
-      <select class="sel" id="hr" style="margin-top:30px"><option value="">HORÁRIOS</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option><option>20:00</option><option>21:00</option></select>
+      <p id="arena-nome" style="font-size:14px;font-weight:800;color:var(--navy);margin:-18px 0 18px"></p>
+      <select class="sel" id="quadra" onchange="mostrarHorarios()"><option value="">QUADRA / ESPORTE</option></select>
+      <select class="sel" id="dia" style="margin-top:14px"><option value="">DIAS DE SEMANA</option></select>
+      <select class="sel" id="hr" style="margin-top:14px"><option value="">HORÁRIOS</option></select>
     </div>
     <button class="btn btn-o" onclick="agendar()">AGENDAR</button>
   </div>
@@ -31,13 +33,40 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
 <script>
-function agendar(){
-  const d=document.getElementById('dia').value;
-  const h=document.getElementById('hr').value;
-  if(!d||!h){alert('Selecione o dia e o horário.');return;}
-  alert(`Agendamento confirmado!\n${d} às ${h}`);
-  location.href='home.html';
+const arenaId=new URLSearchParams(location.search).get('arena');
+let quadras=[];
+document.getElementById('dia').innerHTML+=DIAS.map(d=>`<option value="${d.valor}">${d.rotulo}</option>`).join('');
+if(exigirLogin()){
+  if(!arenaId)location.replace('agendamentos.html');
+  else carregar();
+}
+async function carregar(){
+  try{
+    const [arena,qs]=await Promise.all([API.arena(arenaId),API.quadras(arenaId)]);  // GET /api/arenas/:id e /quadras
+    quadras=qs;
+    document.getElementById('arena-nome').textContent=`${arena.nome} – ${arena.cidade}`;
+    document.getElementById('quadra').innerHTML='<option value="">QUADRA / ESPORTE</option>'+
+      quadras.map((q,i)=>`<option value="${q.id}">QUADRA ${String(i+1).padStart(2,'0')} – ${esc(rotuloEsporte(q.tipo_esporte))}</option>`).join('');
+  }catch(e){mostrarErro(e)}
+}
+// Só os horários definidos para a quadra são oferecidos (RNE-002).
+function mostrarHorarios(){
+  const q=quadras.find(x=>x.id===document.getElementById('quadra').value);
+  document.getElementById('hr').innerHTML='<option value="">HORÁRIOS</option>'+
+    (q?q.horarios_disponiveis.map(h=>`<option>${h}</option>`).join(''):'');
+}
+async function agendar(){
+  const quadra_id=document.getElementById('quadra').value;
+  const dia_semana=document.getElementById('dia').value;
+  const horario=document.getElementById('hr').value;
+  if(!quadra_id||!dia_semana||!horario){alert('Selecione a quadra, o dia e o horário.');return;}
+  try{
+    await API.reservar({quadra_id,dia_semana,horario});   // POST /api/reservas (RF-004, RNE-001, RNE-002)
+    alert(`Agendamento confirmado!\n${rotuloDia(dia_semana)} às ${horario}`);
+    location.href='minha-agenda.html';
+  }catch(e){mostrarErro(e)}
 }
 </script>
 </body>

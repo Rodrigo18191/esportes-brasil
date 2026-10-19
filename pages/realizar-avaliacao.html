@@ -31,6 +31,7 @@
   <!-- Formulário -->
   <div class="content" id="form">
     <p class="ftitle">REALIZAR AVALIAÇÃO</p>
+    <p id="arena-nome" style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:14px"></p>
     <div class="drop-wrap">
       <div class="drop-trigger" id="trig" onclick="toggle()">
         <span id="lbl">BOM</span>
@@ -48,6 +49,7 @@
   <!-- Sucesso -->
   <div id="sucesso">
     <p>AVALIAÇÃO REALIZADA<br>COM SUCESSO!</p>
+    <p id="media" style="font-size:13px;font-weight:600"></p>
     <button class="btn btn-o" onclick="location.href='home.html'">VOLTAR PARA A TELA PRINCIPAL</button>
     <button class="btn btn-o" onclick="nova()">REALIZAR NOVA AVALIAÇÃO</button>
   </div>
@@ -58,11 +60,24 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
 <script>
+const arenaId=new URLSearchParams(location.search).get('arena');
+const NOTAS={'MUITO BOM':'MUITO_BOM','BOM':'BOM','MÉDIO':'MEDIO','RUIM':'RUIM'};
+if(exigirLogin()){
+  if(!arenaId)location.replace('avaliacao-quadras.html');
+  else API.arena(arenaId).then(a=>{document.getElementById('arena-nome').textContent=a.nome}).catch(mostrarErro);
+}
 let cur='BOM';
 function toggle(){document.getElementById('dl').classList.toggle('open')}
 function pick(v){cur=v;document.getElementById('lbl').textContent=v;document.querySelectorAll('.drop-opt').forEach(o=>o.classList.toggle('sel',o.textContent===v));document.getElementById('dl').classList.remove('open')}
-function avaliar(){document.getElementById('form').style.display='none';document.getElementById('sucesso').style.display='flex'}
+async function avaliar(){
+  try{
+    const r=await API.avaliar(arenaId,NOTAS[cur]);   // POST /api/avaliacoes (RNE-005)
+    document.getElementById('media').textContent=`Nova média da arena ${r.arena.nome}: ${Number(r.arena.avaliacao_media).toFixed(1)}`;
+    document.getElementById('form').style.display='none';document.getElementById('sucesso').style.display='flex';
+  }catch(e){mostrarErro(e)}
+}
 function nova(){document.getElementById('form').style.display='flex';document.getElementById('sucesso').style.display='none';pick('BOM')}
 document.addEventListener('click',e=>{if(!e.target.closest('.drop-wrap'))document.getElementById('dl').classList.remove('open')})
 </script>

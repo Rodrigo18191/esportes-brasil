@@ -54,10 +54,17 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
+<script src="../js/api.js"></script>
 <script>
+exigirLogin();
 let reg='';
 function sel(el,nome){document.querySelectorAll('.mapa path').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');reg=nome}
-function buscar(){if(!reg){alert('Selecione uma região no mapa.');return;}location.href='agendamentos.html'}
+function buscar(){
+  if(!reg){alert('Selecione uma região no mapa.');return;}
+  // A cidade vai como filtro para GET /api/arenas?cidade= (sem acentos, como está no banco).
+  const c=document.getElementById('cidade').value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  location.href='agendamentos.html'+(c?'?cidade='+encodeURIComponent(c):'');
+}
 </script>
 </body>
 </html>

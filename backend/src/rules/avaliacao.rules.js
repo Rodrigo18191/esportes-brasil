@@ -6,7 +6,7 @@ const arenaRepository = require('../repositories/arena.repository');
 const avaliacaoRepository = require('../repositories/avaliacao.repository');
 
 /**
- * RNE-005 — A avaliacao de uma quadra so pode ser realizada por usuarios
+ * RNE-005 — A avaliacao de uma arena so pode ser realizada por usuarios
  * autenticados.
  *
  * A exigencia de autenticacao e garantida pelo `auth.middleware.js` aplicado na

@@ -8,7 +8,7 @@ const env = require('./config/env');
 app.listen(env.PORT, () => {
   console.log('==================================================');
   console.log(' Esportes Brasil — API');
-  console.log(` Servidor: http://localhost:${env.PORT}`);
+  console.log(` App:      http://localhost:${env.PORT}`);
   console.log(` Health:   http://localhost:${env.PORT}/api/health`);
   console.log(` Banco:    ${env.DB_PATH}`);
   console.log('==================================================');

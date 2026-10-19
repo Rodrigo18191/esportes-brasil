@@ -26,17 +26,26 @@
     <a class="bitem" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Chat</span></a>
   </nav>
 </div>
-<script src="../js/app.js"></script>
+<script src="../js/api.js"></script>
 <script>
-const cores=['#e63946','#2b9348','#023e8a','#e76f51'];
+// GET /api/arenas (RF-003) — filtro opcional por cidade vindo da tela de localização.
+const DESTINO='realizar-agendamento.html';
+const cidade=new URLSearchParams(location.search).get('cidade')||'';
 const g=document.getElementById('grid');
-DB.arenas.forEach((a,i)=>{
-  g.innerHTML+=`<div class="arena-card" onclick="location.href='realizar-agendamento.html'">
-    <div class="arena-badge" style="background:${cores[i]}">${a.sigla}</div>
-    <div class="arena-name">${a.nome}</div>
-    <div class="arena-rating"><span class="star">★</span> ${a.rating.toFixed(1)} (${a.avals} avaliações)</div>
-  </div>`;
-});
+if(exigirLogin())carregar();
+async function carregar(){
+  if(cidade)document.querySelector('.slbl').textContent=`ARENAS EM ${cidade.toUpperCase()}:`;
+  g.innerHTML='<p class="carregando">Carregando arenas...</p>';
+  try{
+    const arenas=await API.arenas({cidade});
+    if(!arenas.length){g.innerHTML='<p class="carregando">Nenhuma arena encontrada.</p>';return;}
+    g.innerHTML=arenas.map((a,i)=>`<div class="arena-card" onclick="location.href='${DESTINO}?arena=${a.id}'">
+    <div class="arena-badge" style="background:${corArena(i)}">${esc(siglaArena(a.nome))}</div>
+    <div class="arena-name">${esc(a.nome)}</div>
+    <div class="arena-rating"><span class="star">★</span> ${Number(a.avaliacao_media).toFixed(1)} (${a.total_avaliacoes} avaliações)</div>
+  </div>`).join('');
+  }catch(e){g.innerHTML=`<p class="carregando">${esc(e.message)}</p>`}
+}
 </script>
 </body>
 </html>

@@ -53,6 +53,16 @@ function listarMinhas(req, res, next) {
   }
 }
 
+/** GET /api/turmas/:id  (autenticada) — turma com participantes */
+function detalhar(req, res, next) {
+  try {
+    const turma = turmaService.detalhar(req.params.id);
+    return res.status(200).json(turma);
+  } catch (erro) {
+    return next(erro);
+  }
+}
+
 /** POST /api/turmas/:id/participar  (autenticada) */
 function participar(req, res, next) {
   try {
@@ -70,4 +80,4 @@ function participar(req, res, next) {
   }
 }
 
-module.exports = { criar, listar, listarMinhas, participar };
+module.exports = { criar, listar, listarMinhas, detalhar, participar };
